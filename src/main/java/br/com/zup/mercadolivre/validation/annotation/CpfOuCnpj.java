@@ -18,7 +18,7 @@ import java.lang.annotation.*;
 @ConstraintComposition(CompositionType.OR)
 public @interface CpfOuCnpj {
 
-    String message() default "Precisa ser um CPF ou CNPJ válido.";
+    String message() default "{messages.CpfOuCnpj}";
 
     Class<?>[] groups() default {};
 

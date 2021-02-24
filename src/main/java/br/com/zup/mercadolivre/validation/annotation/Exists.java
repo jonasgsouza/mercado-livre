@@ -17,7 +17,7 @@ public @interface Exists {
 
     Class<?> modelClass();
 
-    String message() default "não existe";
+    String message() default "{messages.Exists}";
 
     Class<?>[] groups() default {};
 
