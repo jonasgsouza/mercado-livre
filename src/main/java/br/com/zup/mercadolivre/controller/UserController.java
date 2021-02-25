@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 
 @RestController
@@ -21,7 +22,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> save(@RequestBody @Valid NewUserRequest request) {
+    @Transactional
+    public ResponseEntity<Void> create(@RequestBody @Valid NewUserRequest request) {
         userRepository.save(request.toModel());
         return ResponseEntity.ok().build();
     }

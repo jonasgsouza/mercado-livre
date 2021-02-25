@@ -6,7 +6,7 @@ import org.springframework.beans.BeanWrapperImpl;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ public class UniqueValuesConstraint implements ConstraintValidator<UniqueValues,
         var query = createQuery(o);
         var bean = new BeanWrapperImpl(o);
         fields.forEach(field -> query.setParameter(field, bean.getPropertyValue(field)));
-        var isValid = query.getResultList().isEmpty();
+        var isValid = query.getSingleResult() == 0;
         if (!isValid) {
             constraintValidatorContext.disableDefaultConstraintViolation();
             for (var field : fields) {
@@ -51,9 +51,9 @@ public class UniqueValuesConstraint implements ConstraintValidator<UniqueValues,
         return modelClass.getSimpleName();
     }
 
-    private Query createQuery(Object o) {
+    private TypedQuery<Long> createQuery(Object o) {
         var stringBuilder = new StringBuilder();
-        stringBuilder.append("from ").append(getTableName()).append(" t where ");
+        stringBuilder.append("select count(t) from ").append(getTableName()).append(" t where ");
         fields.forEach(field -> {
             var alias = ValidationUtils.getFieldAlias(o, field, field);
             stringBuilder
@@ -62,6 +62,6 @@ public class UniqueValuesConstraint implements ConstraintValidator<UniqueValues,
                     .append(" = :").append(field);
 
         });
-        return manager.createQuery(stringBuilder.toString().replaceFirst("and", ""));
+        return manager.createQuery(stringBuilder.toString().replaceFirst("and", ""), Long.class);
     }
 }

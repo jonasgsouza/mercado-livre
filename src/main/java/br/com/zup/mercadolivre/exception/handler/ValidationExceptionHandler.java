@@ -19,7 +19,7 @@ public class ValidationExceptionHandler {
     private MessageSource messageSource;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public List<ValidationErrorDto> handle(MethodArgumentNotValidException e) {
         return e.getBindingResult()
                 .getFieldErrors()

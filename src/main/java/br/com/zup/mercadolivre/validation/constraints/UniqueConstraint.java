@@ -5,7 +5,7 @@ import br.com.zup.mercadolivre.validation.annotation.Unique;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
@@ -23,22 +23,22 @@ public class UniqueConstraint implements ConstraintValidator<Unique, Object> {
     @Override
     public void initialize(Unique constraintAnnotation) {
         field = constraintAnnotation.field();
-        alias = constraintAnnotation.alias();
+        var alias = constraintAnnotation.alias();
+        this.alias = !alias.isEmpty() ? alias : field;
         modelClass = constraintAnnotation.modelClass();
     }
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext constraintValidatorContext) {
         if (value == null) return true;
-        return createQuery().setParameter("value", value).getResultList().isEmpty();
+        return createQuery().setParameter("value", value).getSingleResult() == 0;
     }
 
     private String getTableName() {
         return modelClass.getSimpleName();
     }
 
-    private Query createQuery() {
-        var alias = this.alias != null && !this.alias.isEmpty() ? this.alias : this.field;
-        return manager.createQuery("from " + getTableName() + " t where t." + alias + " = :value");
+    private TypedQuery<Long> createQuery() {
+        return manager.createQuery("select count(t) from " + getTableName() + " t where t." + alias + " = :value", Long.class);
     }
 }
